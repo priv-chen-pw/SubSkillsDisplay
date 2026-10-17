@@ -1,0 +1,63 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>SubSkillsDisplay</AssemblyName>
+    <RootNamespace>SubSkillsDisplay</RootNamespace>
+    <Version>1.1.0</Version>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- Publicizer001 = "accessing a member that was not originally public".
+         Unavoidable and routine in RoR2 modding, so it is not treated as noise. -->
+    <NoWarn>$(NoWarn);Publicizer001</NoWarn>
+    <!-- Where the built dll gets dropped so r2modman picks it up. -->
+    <Ror2DevProfile>$(APPDATA)\r2modmanPlus-local\RiskOfRain2\profiles\SubSkillDisplay</Ror2DevProfile>
+    <Ror2DeployDir>$(Ror2DevProfile)\BepInEx\plugins\SubSkillsDisplay</Ror2DeployDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Mod loader -->
+    <PackageReference Include="BepInEx.Core" Version="5.4.21" />
+    <PackageReference Include="BepInEx.Analyzers" Version="1.0.*" PrivateAssets="all" />
+
+    <!-- Game assemblies, publicized. Same versions as KarmaClimb and EclipseAllMaps, verified against
+         the installed build (Unity 2021.3.45f2, DLC1-4). -->
+    <PackageReference Include="RiskOfRain2.GameLibs" Version="1.5.0-r.1" />
+    <PackageReference Include="UnityEngine.Modules" Version="2021.3.45" IncludeAssets="compile" />
+    <PackageReference Include="MMHOOK.RoR2" Version="2026.10.8" NoWarn="NU1701" />
+  </ItemGroup>
+
+  <!-- Release builds also produce the Thunderstore package: the five files flat at the zip root, as
+       Thunderstore and r2modman require (a zipped folder, or another archive format, is not read). -->
+  <Target Name="PackageThunderstore" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+    <PropertyGroup>
+      <RepoRoot>$(MSBuildProjectDirectory)\..\</RepoRoot>
+      <PackageStage>$(MSBuildProjectDirectory)\obj\thunderstore-package\</PackageStage>
+      <PackageZip>$(RepoRoot)artifacts\SubSkillsDisplay-$(Version).zip</PackageZip>
+      <ManifestText>$([System.IO.File]::ReadAllText('$(RepoRoot)Thunderstore\manifest.json'))</ManifestText>
+      <ManifestVersion>$([System.Text.RegularExpressions.Regex]::Match($(ManifestText), '(?&lt;="version_number"\s*:\s*")[^"]+').Value)</ManifestVersion>
+      <PluginText>$([System.IO.File]::ReadAllText('$(MSBuildProjectDirectory)\SubSkillsDisplayPlugin.cs'))</PluginText>
+      <PluginVersion>$([System.Text.RegularExpressions.Regex]::Match($(PluginText), '(?&lt;=PluginVersion = ")[^"]+').Value)</PluginVersion>
+    </PropertyGroup>
+
+    <!-- Thunderstore refuses a version twice, so a mismatch here means a broken release. -->
+    <Error Condition="'$(ManifestVersion)' != '$(Version)'" Text="Thunderstore/manifest.json version_number ($(ManifestVersion)) does not match the project Version ($(Version))." />
+    <Error Condition="'$(PluginVersion)' != '$(Version)'" Text="SubSkillsDisplayPlugin.PluginVersion ($(PluginVersion)) does not match the project Version ($(Version))." />
+
+    <RemoveDir Directories="$(PackageStage)" />
+    <Copy SourceFiles="$(TargetPath);$(RepoRoot)Thunderstore\manifest.json;$(RepoRoot)Thunderstore\icon.png;$(RepoRoot)README.md;$(RepoRoot)CHANGELOG.md"
+          DestinationFolder="$(PackageStage)" />
+    <MakeDir Directories="$(RepoRoot)artifacts" />
+    <ZipDirectory SourceDirectory="$(PackageStage)" DestinationFile="$(PackageZip)" Overwrite="true" />
+    <Message Importance="high" Text="Thunderstore package -> $(PackageZip)" />
+  </Target>
+
+  <Target Name="DeployToProfile" AfterTargets="Build" Condition="Exists('$(Ror2DevProfile)')">
+    <MakeDir Directories="$(Ror2DeployDir)" />
+    <Copy SourceFiles="$(TargetPath);$(TargetDir)$(AssemblyName).pdb"
+          DestinationFolder="$(Ror2DeployDir)"
+          ContinueOnError="true" />
+    <Message Importance="high" Text="SubSkillsDisplay -> $(Ror2DeployDir)" />
+  </Target>
+
+</Project>

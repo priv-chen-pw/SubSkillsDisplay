@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The skill-swapping patterns character mods use, to check OverrideSitesTest finds all nine loads:
+       dotnet build tools/OverrideSitesTest/FakeMod, then run OverrideSitesTest on its dll. -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <NoWarn>$(NoWarn);Publicizer001</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="RiskOfRain2.GameLibs" Version="1.5.0-r.1" />
+    <PackageReference Include="UnityEngine.Modules" Version="2021.3.45" IncludeAssets="compile" />
+  </ItemGroup>
+
+</Project>

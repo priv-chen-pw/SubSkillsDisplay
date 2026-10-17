@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Runs SkillOverrideSites (the mod's IL reading, no Unity needed) over any assembly and prints what it finds.
+       dotnet run with the project tools/OverrideSitesTest and the dll path as its argument -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Mono.Cecil" Version="0.11.4" />
+    <Compile Include="..\..\SubSkillsDisplay\SkillOverrideSites.cs" Link="SkillOverrideSites.cs" />
+    <Compile Remove="FakeMod\**" />
+  </ItemGroup>
+
+</Project>
