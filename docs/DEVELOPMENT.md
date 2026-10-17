@@ -77,8 +77,9 @@ Secondary, Utility, Special (the Loadout tab's titles), then any other: a loadou
 
 Hovering writes into the panel's description box like the Loadout tab (`LOGBOOK_HOVER_DESCRIPTION_FORMAT`:
 name, then description), followed by the keyword explanations the Skills tab shows
-([SkillEntry.cs](../SubSkillsDisplay/SkillEntry.cs)), and the button's `TooltipProvider` gets the name and
-description as in the Loadout tab. [Keywords.cs](../SubSkillsDisplay/Keywords.cs) adds, to a skill's own
+([SkillEntry.cs](../SubSkillsDisplay/SkillEntry.cs)). In the Extra Skills tab the button's `TooltipProvider`
+also gets the name and description, as in the Loadout tab; the pause panel destroys it, since its description
+box already shows the skill (the tooltip only opens from its own pointer and selection events). [Keywords.cs](../SubSkillsDisplay/Keywords.cs) adds, to a skill's own
 `keywordTokens`, the keywords its description highlights: every keyword some skill or passive lists is
 indexed by its name (the `cKeywordName` part of its text, in the current language; a name several keywords
 share, like CHEF's per-skill "Boost", is skipped unless exactly one is a shared `KEYWORD_` one), and matched

@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.1
+
+* Pause menu Abilities: no floating tooltip on hover; the description box beside the lines already shows the skill.
+* README: smaller skill icons, hosted with the mod.
+
 ## 1.1.0
 
 * The tab is now **Extra Skills**, with a line saying what it shows. It is always there, and lists every unlocked extra skill whatever the loadout (no Only current loadout setting any more).
