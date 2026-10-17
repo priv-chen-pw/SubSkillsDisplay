@@ -64,13 +64,9 @@ namespace SubSkillsDisplay
         /// <summary>Height of a Loadout row.</summary>
         internal const float LineHeight = 96f;
 
-        /// <param name="tooltips">
-        /// Whether hovering also opens the Loadout tab's floating tooltip (name and description) next to the
-        /// description box.
-        /// </param>
         /// <returns>The rows made, to destroy on the next rebuild.</returns>
         internal static List<GameObject> Build(RectTransform container, IEnumerable<SkillLine> lines, Color color,
-            LanguageTextMeshController hoverText, UILayerKey requiredTopLayer, bool tooltips = true)
+            LanguageTextMeshController hoverText, UILayerKey requiredTopLayer)
         {
             List<GameObject> rows = new List<GameObject>();
             GameObject rowPrefab = LoadoutPanelController.rowPrefab;
@@ -112,7 +108,7 @@ namespace SubSkillsDisplay
                 Transform buttons = row.transform.Find("ButtonContainer") ?? row.transform;
                 foreach (SkillEntry entry in line.entries)
                 {
-                    AddButton(buttonPrefab, buttons, entry, color, hoverText, requiredTopLayer, tooltips);
+                    AddButton(buttonPrefab, buttons, entry, color, hoverText, requiredTopLayer);
                 }
 
                 // Vanilla keeps the spacer after the buttons, so they sit at the start of the line.
@@ -123,7 +119,7 @@ namespace SubSkillsDisplay
         }
 
         private static void AddButton(GameObject buttonPrefab, Transform parent, SkillEntry entry, Color color,
-            LanguageTextMeshController hoverText, UILayerKey requiredTopLayer, bool tooltips)
+            LanguageTextMeshController hoverText, UILayerKey requiredTopLayer)
         {
             GameObject buttonObject = Object.Instantiate(buttonPrefab, parent, worldPositionStays: false);
             HGButton button = buttonObject.GetComponent<HGButton>();
@@ -150,17 +146,12 @@ namespace SubSkillsDisplay
             colors.colorMultiplier = 1f;
             button.colors = colors;
 
-            // The tooltip opens from its own pointer and selection events, so without it only the box shows.
+            // No floating tooltip: the description box beside the lines already shows the skill. The tooltip opens
+            // from its own pointer and selection events, so removing it leaves only the box.
             TooltipProvider tooltip = buttonObject.GetComponent<TooltipProvider>();
-            if (tooltip && !tooltips)
+            if (tooltip)
             {
                 Object.Destroy(tooltip);
-            }
-            else if (tooltip)
-            {
-                tooltip.titleColor = color;
-                tooltip.overrideTitleText = entry.Title;
-                tooltip.overrideBodyText = entry.Description;
             }
         }
     }

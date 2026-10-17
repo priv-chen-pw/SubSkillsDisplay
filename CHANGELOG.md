@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.2
+
+* Extra Skills tab: no floating tooltip on hover either; the description box beside the lines already shows the skill.
+* README: screenshots.
+
 ## 1.1.1
 
 * Pause menu Abilities: no floating tooltip on hover; the description box beside the lines already shows the skill.

@@ -309,8 +309,7 @@ namespace SubSkillsDisplay
             }
 
             LanguageTextMeshController hoverText = stripButton ? stripButton.hoverLanguageTextMeshController : null;
-            // The description box beside the lines already shows each skill, so no floating tooltip as well.
-            SkillLines.Build((RectTransform)column.transform, lines, color, hoverText, key, tooltips: false);
+            SkillLines.Build((RectTransform)column.transform, lines, color, hoverText, key);
 
             float padding = columnLayout ? columnLayout.padding.vertical : 0f;
             float spacing = columnLayout ? columnLayout.spacing : 0f;
