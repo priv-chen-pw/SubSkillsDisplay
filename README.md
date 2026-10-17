@@ -3,6 +3,7 @@
 Shows the skills character select doesn't: what a survivor's skills turn into during a run. View only.
 
 * **Character select:** an Extra Skills tab, after Loadout. Lines per skill type, like the Loadout tab; hover a skill for its description and keywords.
+<img width="649" height="411" alt="image" src="https://github.com/user-attachments/assets/901e177a-9da3-47e0-b432-075bee1148fa" />
 
 * **Pause menu:** Abilities, during a run. Each of your skills, followed by what it turns into.
 <img width="178" height="200" alt="image" src="https://github.com/user-attachments/assets/6aae6c1a-8b61-4db6-9168-b87017f3d490" />
