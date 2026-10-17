@@ -6,7 +6,9 @@ Shows the skills character select doesn't: what a survivor's skills turn into du
 <img width="649" height="411" alt="image" src="https://github.com/user-attachments/assets/901e177a-9da3-47e0-b432-075bee1148fa" />
 
 * **Pause menu:** Abilities, during a run. Each of your skills, followed by what it turns into.
+
 <img width="178" height="200" alt="image" src="https://github.com/user-attachments/assets/6aae6c1a-8b61-4db6-9168-b87017f3d490" />
+
 <img width="620" height="379" alt="image" src="https://github.com/user-attachments/assets/b3ef2a74-a3a9-4cf0-b578-3b5552b4f0d7" />
 
 Skills from loadout choices you haven't unlocked aren't shown. Other players don't need the mod.

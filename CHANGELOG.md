@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.3
+
+* README: character select screenshot.
+
 ## 1.1.2
 
 * Extra Skills tab: no floating tooltip on hover either; the description box beside the lines already shows the skill.
