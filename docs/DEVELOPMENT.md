@@ -29,7 +29,7 @@ Thunderstore package. It fails if `Version` in the csproj, `version_number` in t
 icons, exported from the game's sprites.
 
 The README's skill icons are in [docs/images](images), downloaded from the
-[Risk of Rain 2 Wiki](https://riskofrain2.wiki.gg/) and shrunk to 64×64 (half the wiki's usual 128 px), and
+[Risk of Rain 2 Wiki](https://riskofrain2.wiki.gg/) and shrunk to 32×32 (a quarter of the wiki's usual 128 px), and
 linked by raw GitHub URL. Linking the wiki's images directly doesn't work: wiki.gg answers 403 to GitHub's
 image proxy and to requests from Thunderstore pages, and 429 to quick series of downloads.
 
