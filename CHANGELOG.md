@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.4
+
+* README: screenshots on their own lines, not inside the text.
+
 ## 1.1.3
 
 * README: character select screenshot.
