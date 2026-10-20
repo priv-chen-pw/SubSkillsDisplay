@@ -4,11 +4,13 @@ Shows the skills character select doesn't: what a survivor's skills turn into du
 
 **Character select:** an Extra Skills tab, after Loadout. Lines per skill type, like the Loadout tab; hover a skill for its description and keywords.
 
-<img width="649" height="411" alt="Extra Skills tab in character select" src="https://github.com/user-attachments/assets/901e177a-9da3-47e0-b432-075bee1148fa" />
+<img width="649" height="411" alt="Extra Skills tab in character select" src="https://github.com/user-attachments/assets/94dfd217-74fb-459a-817c-b8a4e6bd9704" />
+
 
 **Pause menu:** Abilities, during a run. Each of your skills, followed by what it turns into.
 
-<img width="178" height="200" alt="Abilities in the pause menu" src="https://github.com/user-attachments/assets/6aae6c1a-8b61-4db6-9168-b87017f3d490" /> <img width="620" height="379" alt="Abilities panel" src="https://github.com/user-attachments/assets/b3ef2a74-a3a9-4cf0-b578-3b5552b4f0d7" />
+<img width="178" height="200" alt="Abilities in the pause menu" src="https://github.com/user-attachments/assets/6aae6c1a-8b61-4db6-9168-b87017f3d490" /> <img width="620" height="379" alt="image" src="https://github.com/user-attachments/assets/4e53ecba-26e0-4d1e-9c2b-c48c7fc189ef" />
+
 
 Skills from loadout choices you haven't unlocked aren't shown. Other players don't need the mod.
 
