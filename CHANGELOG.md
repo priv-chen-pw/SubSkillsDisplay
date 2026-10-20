@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.5
+
+* No X% HP keyword on the Anima Harvester's skills: the game lists it, but they cost no health.
+* A word in a description no longer brings in another survivor's keyword: no Operator's Ricochet on Drifter's Tornado Slam, no Enforcer's Temporary Barrier on Seeker's Soul Spiral, Loader's passive or Operator's drone commands.
+
 ## 1.1.4
 
 * README: screenshots on their own lines, not inside the text.

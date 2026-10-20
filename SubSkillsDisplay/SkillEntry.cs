@@ -71,7 +71,7 @@ namespace SubSkillsDisplay
             string description = Description;
             color.a = 0.2f;
             string text = Language.GetStringFormatted("LOGBOOK_HOVER_DESCRIPTION_FORMAT", Title, description, ColorUtility.ToHtmlStringRGBA(color));
-            string[] keywords = Keywords.For(keywordTokens, description).Select(Language.GetString).ToArray();
+            string[] keywords = Keywords.For(keywordTokens, description, nameToken, descriptionToken).Select(Language.GetString).ToArray();
             return keywords.Length == 0 ? text : text + "\n\n" + string.Join("\n\n", keywords);
         }
     }
