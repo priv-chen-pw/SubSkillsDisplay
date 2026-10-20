@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.6
+
+* README: new images and formatting.
+
 ## 1.1.5
 
 * No X% HP keyword on the Anima Harvester's skills: the game lists it, but they cost no health.
