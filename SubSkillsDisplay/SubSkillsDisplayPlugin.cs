@@ -15,7 +15,7 @@ namespace SubSkillsDisplay
         public const string PluginAuthor = "chen-ror2";
         public const string PluginName = "SubSkillsDisplay";
         public const string PluginGuid = PluginAuthor + "." + PluginName;
-        public const string PluginVersion = "1.1.6";
+        public const string PluginVersion = "1.1.7";
 
         public void Awake()
         {

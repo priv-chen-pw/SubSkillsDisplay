@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.7
+
+* README: survivor icons, and icons in the Given by column.
+
 ## 1.1.6
 
 * README: new images and formatting.

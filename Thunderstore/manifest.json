@@ -1,6 +1,6 @@
 {
   "name": "SubSkillsDisplay",
-  "version_number": "1.1.6",
+  "version_number": "1.1.7",
   "website_url": "https://github.com/priv-chen-pw/SubSkillsDisplay",
   "description": "Shows the skills character select leaves out, such as Acolyte's Anima Harvester, Void Fiend's corrupted skills and CHEF's boosts: in an Extra Skills tab in character select, and under Abilities in the pause menu during a run.",
   "dependencies": [
