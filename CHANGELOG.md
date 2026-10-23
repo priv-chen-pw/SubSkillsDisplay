@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.1
+
+* README: videos instead of screenshots.
+
 ## 1.2.0
 
 * Extra Skills tab: each line starts with the loadout skill that changes, then an arrow, then what it turns into, as in the pause menu. CHEF's boosts each follow their own skill (Sear → Boosted Sear, Ice Box → Boosted Ice Box).
