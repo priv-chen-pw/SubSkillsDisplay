@@ -264,12 +264,12 @@ namespace SubSkillsDisplay
                             continue;
                         }
 
-                        SkillDef current = body.Selected(boostedSlot);
-                        bool boostsCurrent = current && current.skillName == boosted.skillName;
+                        (SkillDef baseSkill, bool baseSelected, bool baseUnlocked) = body.Variants(body.SlotOf(boostedSlot))
+                            .FirstOrDefault(variant => variant.skill.skillName == boosted.skillName);
 
                         // Both Yes, CHEF! and the skill it boosts have to be unlocked.
-                        bool baseUnlocked = body.IsUnlocked(boostedSlot, boosted.skillName);
-                        found.Add(new ExtraSkill(boosted, boostedSlot, yesChef.skillNameToken, selected && boostsCurrent, unlocked && baseUnlocked));
+                        found.Add(new ExtraSkill(boosted, boostedSlot, yesChef.skillNameToken, selected && baseSelected, unlocked && baseUnlocked,
+                            replaces: baseSkill));
                     }
                 }
             }

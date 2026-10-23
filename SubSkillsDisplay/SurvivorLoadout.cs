@@ -124,26 +124,6 @@ namespace SubSkillsDisplay
             }
         }
 
-        /// <summary>Whether the variant of the <paramref name="kind"/> slot named <paramref name="skillName"/> is unlocked.</summary>
-        internal bool IsUnlocked(SkillSlot kind, string skillName)
-        {
-            GenericSkill genericSkill = SlotOf(kind);
-            if (!genericSkill || !genericSkill.skillFamily)
-            {
-                return false;
-            }
-
-            foreach (SkillFamily.Variant variant in genericSkill.skillFamily.variants)
-            {
-                if (variant.skillDef && variant.skillDef.skillName == skillName && IsUnlocked(variant))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
         private bool IsUnlocked(SkillFamily.Variant variant) =>
             profile == null || !variant.unlockableDef || profile.HasUnlockable(variant.unlockableDef);
     }

@@ -1,8 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using RoR2;
+using RoR2.Skills;
 using RoR2.UI;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 using UnityEngine.UI;
 
 namespace SubSkillsDisplay
@@ -34,21 +36,40 @@ namespace SubSkillsDisplay
         }
 
         /// <summary>
-        /// Extra skills grouped in lines: Primary, Secondary, Utility and Special, then the other lines (a loadout
-        /// row's title, or Misc) in the order they come up.
+        /// Extra skills of <paramref name="body"/> grouped in lines: Primary, Secondary, Utility and Special (see
+        /// <see cref="AddTurningInto"/>), then the other lines (a loadout row's title, or Misc) in the order they
+        /// come up.
         /// </summary>
-        internal static List<SkillLine> FromExtras(IEnumerable<ExtraSkill> extras)
+        internal static List<SkillLine> FromExtras(SurvivorLoadout body, IEnumerable<ExtraSkill> extras)
         {
             List<SkillLine> lines = new List<SkillLine>();
             foreach (IGrouping<string, ExtraSkill> group in extras.GroupBy(extra => extra.LineKey).OrderBy(group => Order(group.First().slot)))
             {
                 ExtraSkill first = group.First();
                 SkillLine line = new SkillLine(first.slot != SkillSlot.None ? TitleFor(first.slot) : first.lineToken ?? MiscTitleToken);
-                line.entries.AddRange(group.Select(SkillEntry.Of));
+                line.AddTurningInto(body, first.slot, group);
                 lines.Add(line);
             }
 
             return lines;
+        }
+
+        /// <summary>
+        /// Adds each loadout skill <paramref name="extras"/> replace in <paramref name="slot"/>, an arrow, and the
+        /// extras it turns into. Extras of no slot replace nothing, so they are added alone.
+        /// </summary>
+        internal void AddTurningInto(SurvivorLoadout body, SkillSlot slot, IEnumerable<ExtraSkill> extras)
+        {
+            foreach (IGrouping<SkillDef, ExtraSkill> group in extras.GroupBy(extra => extra.replaces ? extra.replaces : body.Selected(slot)))
+            {
+                if (group.Key)
+                {
+                    entries.Add(SkillEntry.Of(group.Key));
+                    entries.Add(SkillEntry.Arrow);
+                }
+
+                entries.AddRange(group.Select(SkillEntry.Of));
+            }
         }
 
         private static int Order(SkillSlot slot) => slot == SkillSlot.None ? 4 : (int)slot;
@@ -63,6 +84,14 @@ namespace SubSkillsDisplay
     {
         /// <summary>Height of a Loadout row.</summary>
         internal const float LineHeight = 96f;
+
+        private const string ArrowAddress = "RoR2/Base/UI/texBasicArrowRight.png";
+
+        /// <summary>The arrow's width; its sprite is 38×62, so it is drawn about 40 px high.</summary>
+        private const float ArrowWidth = 24f;
+
+        private static Sprite arrow;
+        private static bool arrowLoaded;
 
         /// <returns>The rows made, to destroy on the next rebuild.</returns>
         internal static List<GameObject> Build(RectTransform container, IEnumerable<SkillLine> lines, Color color,
@@ -108,7 +137,14 @@ namespace SubSkillsDisplay
                 Transform buttons = row.transform.Find("ButtonContainer") ?? row.transform;
                 foreach (SkillEntry entry in line.entries)
                 {
-                    AddButton(buttonPrefab, buttons, entry, color, hoverText, requiredTopLayer);
+                    if (entry.isArrow)
+                    {
+                        AddArrow(buttons, color);
+                    }
+                    else
+                    {
+                        AddButton(buttonPrefab, buttons, entry, color, hoverText, requiredTopLayer);
+                    }
                 }
 
                 // Vanilla keeps the spacer after the buttons, so they sit at the start of the line.
@@ -153,6 +189,37 @@ namespace SubSkillsDisplay
             {
                 Object.Destroy(tooltip);
             }
+        }
+
+        /// <summary>The game's right arrow in the line's colour, between a skill and what it turns into.</summary>
+        private static void AddArrow(Transform parent, Color color)
+        {
+            if (!arrowLoaded)
+            {
+                arrowLoaded = true;
+                arrow = Addressables.LoadAssetAsync<Sprite>(ArrowAddress).WaitForCompletion();
+                if (!arrow)
+                {
+                    Log.Warning($"Could not load {ArrowAddress}; skill lines are shown without arrows.");
+                }
+            }
+
+            if (!arrow)
+            {
+                return;
+            }
+
+            GameObject arrowObject = new GameObject("Arrow", typeof(RectTransform));
+            arrowObject.transform.SetParent(parent, worldPositionStays: false);
+
+            Image image = arrowObject.AddComponent<Image>();
+            image.sprite = arrow;
+            image.color = color;
+            image.preserveAspect = true;
+            image.raycastTarget = false;
+
+            LayoutElement size = arrowObject.AddComponent<LayoutElement>();
+            size.minWidth = size.preferredWidth = ArrowWidth;
         }
     }
 }

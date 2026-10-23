@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace SubSkillsDisplay
 {
-    /// <summary>One skill in a line: its icon, and the text shown when hovering it.</summary>
+    /// <summary>One skill in a line: its icon, and the text shown when hovering it. Or the arrow between a skill and what it turns into.</summary>
     internal readonly struct SkillEntry
     {
         internal readonly Sprite icon;
@@ -14,15 +14,19 @@ namespace SubSkillsDisplay
         private readonly string sourceToken;
         private readonly string descriptionToken;
         private readonly string[] keywordTokens;
+        internal readonly bool isArrow;
 
-        private SkillEntry(Sprite icon, string nameToken, string sourceToken, string descriptionToken, string[] keywordTokens)
+        private SkillEntry(Sprite icon, string nameToken, string sourceToken, string descriptionToken, string[] keywordTokens, bool isArrow = false)
         {
             this.icon = icon;
             this.nameToken = nameToken;
             this.sourceToken = sourceToken;
             this.descriptionToken = descriptionToken;
             this.keywordTokens = keywordTokens;
+            this.isArrow = isArrow;
         }
+
+        internal static readonly SkillEntry Arrow = new SkillEntry(null, null, null, null, null, isArrow: true);
 
         internal static SkillEntry Of(SkillDef skill) =>
             new SkillEntry(skill.icon, skill.skillNameToken, null, skill.skillDescriptionToken, skill.keywordTokens);

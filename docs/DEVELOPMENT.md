@@ -78,6 +78,12 @@ choosable: the highlight is destroyed, every button stays at full brightness, an
 Secondary, Utility, Special (the Loadout tab's titles), then any other: a loadout row's own title
 (Operator's Drone) or Misc.
 
+In the four slot lines each extra follows the loadout skill it replaces and an arrow (the game's
+`texBasicArrowRight` sprite, Addressables key `RoR2/Base/UI/texBasicArrowRight.png`, tinted in the survivor's
+colour; the game's fonts have no → glyph). Most extras replace whichever skill the slot holds, so they follow
+the picked one; CHEF's boosts set `ExtraSkill.replaces` to the skill they boost, so the tab shows
+Sear → Boosted Sear and Ice Box → Boosted Ice Box in one line whichever is picked.
+
 Hovering writes into the panel's description box like the Loadout tab (`LOGBOOK_HOVER_DESCRIPTION_FORMAT`:
 name, then description), followed by the keyword explanations the Skills tab shows
 ([SkillEntry.cs](../SubSkillsDisplay/SkillEntry.cs)). Unlike the Loadout tab, there is no floating tooltip:

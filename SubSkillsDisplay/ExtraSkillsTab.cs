@@ -183,7 +183,7 @@ namespace SubSkillsDisplay
 
             internal void Rebuild(CharacterSelectController controller)
             {
-                List<ExtraSkill> extras = new List<ExtraSkill>();
+                List<SkillLine> lines = new List<SkillLine>();
                 Color bodyColor = Color.gray;
 
                 LocalUser localUser = controller.localUser;
@@ -200,12 +200,14 @@ namespace SubSkillsDisplay
                         bodyColor = body.bodyColor;
                     }
 
-                    // Every unlocked loadout choice's extra skills, whichever is picked.
+                    // Every unlocked loadout choice's extra skills, whichever is picked, each after the skill it
+                    // replaces (built here, while the loadout that picks those is still ours).
                     Loadout loadout = Loadout.RequestInstance();
                     try
                     {
                         localUser.userProfile.CopyLoadout(loadout);
-                        extras = ExtraSkillCatalog.For(SurvivorLoadout.FromLoadout(bodyIndex, loadout, localUser.userProfile), includeOtherLoadouts: true);
+                        SurvivorLoadout survivorLoadout = SurvivorLoadout.FromLoadout(bodyIndex, loadout, localUser.userProfile);
+                        lines = SkillLine.FromExtras(survivorLoadout, ExtraSkillCatalog.For(survivorLoadout, includeOtherLoadouts: true));
                     }
                     finally
                     {
@@ -218,7 +220,6 @@ namespace SubSkillsDisplay
                     Destroy(row);
                 }
 
-                List<SkillLine> lines = SkillLine.FromExtras(extras);
                 rows = SkillLines.Build(panel, lines, bodyColor, hoverText, requiredTopLayer);
                 if (intro)
                 {

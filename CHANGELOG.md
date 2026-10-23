@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.0
+
+* Extra Skills tab: each line starts with the loadout skill that changes, then an arrow, then what it turns into, as in the pause menu. CHEF's boosts each follow their own skill (Sear → Boosted Sear, Ice Box → Boosted Ice Box).
+* Pause menu Abilities: an arrow between each skill and what it turns into.
+
 ## 1.1.7
 
 * README: survivor icons, and icons in the Given by column.

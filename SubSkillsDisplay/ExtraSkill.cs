@@ -32,9 +32,16 @@ namespace SubSkillsDisplay
         /// </summary>
         internal readonly bool unlocked;
 
+        /// <summary>
+        /// The loadout skill it replaces when it replaces only that one (CHEF's boosts); null when it replaces
+        /// whichever skill its slot holds.
+        /// </summary>
+        internal readonly SkillDef replaces;
+
         internal ExtraSkill(SkillDef skill, SkillSlot slot, string sourceToken, bool inLoadout, bool unlocked,
-            string descriptionToken = null, string lineToken = null)
+            string descriptionToken = null, string lineToken = null, SkillDef replaces = null)
         {
+            this.replaces = replaces;
             this.skill = skill;
             this.slot = slot;
             this.lineToken = slot == SkillSlot.None ? lineToken : null;

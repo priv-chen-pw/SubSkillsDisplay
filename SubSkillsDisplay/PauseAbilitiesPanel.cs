@@ -200,20 +200,22 @@ namespace SubSkillsDisplay
             foreach (SkillSlot kind in new[] { SkillSlot.Primary, SkillSlot.Secondary, SkillSlot.Utility, SkillSlot.Special })
             {
                 SkillLine line = new SkillLine(SkillLine.TitleFor(kind));
+                line.AddTurningInto(body, kind, extras.Where(extra => extra.slot == kind));
+
+                // A skill that turns into nothing is shown alone, without an arrow.
                 SkillDef skill = body.Selected(kind);
-                if (skill)
+                if (line.entries.Count == 0 && skill)
                 {
                     line.entries.Add(SkillEntry.Of(skill));
                 }
 
-                line.entries.AddRange(extras.Where(extra => extra.slot == kind).Select(SkillEntry.Of));
                 if (line.entries.Count > 0)
                 {
                     lines.Add(line);
                 }
             }
 
-            lines.AddRange(SkillLine.FromExtras(extras.Where(extra => extra.slot == SkillSlot.None)));
+            lines.AddRange(SkillLine.FromExtras(body, extras.Where(extra => extra.slot == SkillSlot.None)));
             return lines;
         }
 
