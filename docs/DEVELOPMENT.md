@@ -36,6 +36,18 @@ icons, and Tornado Slam's final slam (the wiki only has the loadout skill's), ar
 from the game's bundles, and the survivor icons are their bodies' `portraitIcon`, all shrunk the same way; the
 wiki's are the same pictures.
 
+The README's videos are GIFs in docs/images too (Thunderstore doesn't play mp4), made from 1080p OBS recordings
+with ffmpeg (`winget install Gyan.FFmpeg`), cropped to the UI:
+
+```
+ffmpeg -i in.mp4 -vf "crop=W:H:X:Y,fps=20,scale=720:-1:flags=lanczos,split[a][b];[a]palettegen=stats_mode=diff:max_colors=128[p];[b][p]paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle" -loop 0 out.gif
+```
+
+20 fps is a whole number of GIF delay units (5/100 s), so it plays at real speed; browsers slow frames under
+2/100 s down to 1/10 s, which is why a 60 fps conversion crawls. The character select one is the bigger
+(6.7 MB) because the survivor model animates behind the description box; 128 colours keep it there without
+visible loss. Crops used: character select `1160:860:90:40`, pause menu `1220:720:600:180`.
+
 ## The Extra Skills tab
 
 [ExtraSkillsTab.cs](../SubSkillsDisplay/ExtraSkillsTab.cs). Character select's left panel
