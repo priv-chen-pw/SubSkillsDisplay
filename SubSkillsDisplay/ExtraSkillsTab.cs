@@ -11,6 +11,7 @@ namespace SubSkillsDisplay
     /// Adds an "Extra Skills" tab to character select, last after Loadout. It lists every extra skill of the
     /// survivor that the player has unlocked, in lines per skill type like the Loadout tab's, under a line
     /// explaining what they are. Hovering one shows its description and keywords. Nothing in it can be picked.
+    /// For a survivor with no extra skills the tab is greyed out.
     ///
     /// The tab button and the panel are copies of the Skills tab's, and the lines use the Loadout tab's
     /// prefabs, so fonts, layout and the hover description box come from the game.
@@ -124,7 +125,7 @@ namespace SubSkillsDisplay
             controller.primaryColorImages = WithCopies(controller.primaryColorImages, skillsButton.transform, buttonObject.transform);
             controller.primaryColorTexts = WithCopies(controller.primaryColorTexts, skillsButton.transform, buttonObject.transform);
 
-            navigation.headers.Add(new HGHeaderNavigationController.Header
+            HGHeaderNavigationController.Header header = new HGHeaderNavigationController.Header
             {
                 headerButton = button,
                 headerName = HeaderName,
@@ -132,11 +133,16 @@ namespace SubSkillsDisplay
                 headerRoot = panel,
                 AreConsolePlatformsSupported = skillsHeader.AreConsolePlatformsSupported,
                 isPrimaryPlayerOnly = skillsHeader.isPrimaryPlayerOnly,
-            });
+            };
+            navigation.headers.Add(header);
+
+            // Greys the button out; the navigation re-enables header buttons themselves on every tab change.
+            CanvasGroup buttonGroup = buttonObject.AddComponent<CanvasGroup>();
 
             controller.gameObject.AddComponent<ExtraSkillsView>().Init((RectTransform)panel.transform, intro,
                 stripButton ? stripButton.hoverLanguageTextMeshController : null,
-                stripButton ? stripButton.requiredTopLayer : null);
+                stripButton ? stripButton.requiredTopLayer : null,
+                navigation, header, skillsButton, buttonGroup);
 
             Log.Info("Added the Extra Skills tab to character select.");
         }
@@ -171,20 +177,37 @@ namespace SubSkillsDisplay
             private TMP_Text intro;
             private LanguageTextMeshController hoverText;
             private UILayerKey requiredTopLayer;
+            private HGHeaderNavigationController navigation;
+            private HGHeaderNavigationController.Header header;
+            private MPButton skillsButton;
+            private CanvasGroup buttonGroup;
             private List<GameObject> rows = new List<GameObject>();
+            private List<SkillLine> lines;
+            private Color bodyColor;
 
-            internal void Init(RectTransform panel, TMP_Text intro, LanguageTextMeshController hoverText, UILayerKey requiredTopLayer)
+            /// <summary>The panel size the rows were last fitted to.</summary>
+            private Vector2 fittedTo;
+
+            /// <summary>The panel size last frame.</summary>
+            private Vector2 lastSize;
+
+            internal void Init(RectTransform panel, TMP_Text intro, LanguageTextMeshController hoverText, UILayerKey requiredTopLayer,
+                HGHeaderNavigationController navigation, HGHeaderNavigationController.Header header, MPButton skillsButton, CanvasGroup buttonGroup)
             {
                 this.panel = panel;
                 this.intro = intro;
                 this.hoverText = hoverText;
                 this.requiredTopLayer = requiredTopLayer;
+                this.navigation = navigation;
+                this.header = header;
+                this.skillsButton = skillsButton;
+                this.buttonGroup = buttonGroup;
             }
 
             internal void Rebuild(CharacterSelectController controller)
             {
-                List<SkillLine> lines = new List<SkillLine>();
-                Color bodyColor = Color.gray;
+                lines = new List<SkillLine>();
+                bodyColor = Color.gray;
 
                 LocalUser localUser = controller.localUser;
                 NetworkUser networkUser = localUser?.currentNetworkUser;
@@ -215,17 +238,88 @@ namespace SubSkillsDisplay
                     }
                 }
 
+                if (intro)
+                {
+                    intro.SetText(Language.GetString(ModTokens.ExtraIntro));
+                }
+
+                BuildRows();
+
+                bool hasExtras = lines.Count > 0;
+                buttonGroup.interactable = hasExtras;
+                buttonGroup.alpha = hasExtras ? 1f : 0.5f;
+
+                // Out of the header list while greyed out, so a controller's tab switching skips it.
+                // shortcut: re-added last, so a tab another mod adds after ours swaps places with it; insert by button order if one does.
+                int index = navigation.headers.FindIndex(candidate => candidate.headerButton == header.headerButton);
+                if (hasExtras && index < 0 && header.headerButton.gameObject.activeSelf)
+                {
+                    navigation.headers.Add(header);
+                }
+                else if (!hasExtras && index >= 0)
+                {
+                    if (navigation.currentHeaderIndex == index)
+                    {
+                        navigation.ChooseHeaderByButton(skillsButton);
+                    }
+
+                    navigation.headers.RemoveAt(index);
+                    if (navigation.currentHeaderIndex > index)
+                    {
+                        navigation.currentHeaderIndex--;
+                    }
+                }
+            }
+
+            /// <summary>
+            /// The panel's size is only known once character select is laid out, and follows the screen's shape.
+            /// Refitted once it holds for a frame: UIJuice can animate a panel's width, which would rebuild every frame.
+            /// </summary>
+            private void Update()
+            {
+                Vector2 size = panel.rect.size;
+                if (lines != null && size == lastSize && size != fittedTo)
+                {
+                    BuildRows();
+                }
+
+                lastSize = size;
+            }
+
+            /// <summary>The lines, with buttons as large as fit the panel.</summary>
+            private void BuildRows()
+            {
                 foreach (GameObject row in rows)
                 {
                     Destroy(row);
                 }
 
-                rows = SkillLines.Build(panel, lines, bodyColor, hoverText, requiredTopLayer);
+                fittedTo = panel.rect.size;
+                rows = SkillLines.Build(panel, lines, bodyColor, hoverText, requiredTopLayer, TileFor(fittedTo));
                 if (intro)
                 {
-                    intro.SetText(Language.GetString(lines.Count > 0 ? ModTokens.ExtraIntro : ModTokens.ExtraNone));
                     intro.transform.SetAsFirstSibling();
                 }
+            }
+
+            /// <summary>The tile at which the lines fit in a panel of <paramref name="size"/>, under the explanation.</summary>
+            private float TileFor(Vector2 size)
+            {
+                if (size.x <= 0f || size.y <= 0f)
+                {
+                    return SkillLines.Tile;
+                }
+
+                VerticalLayoutGroup layout = panel.GetComponent<VerticalLayoutGroup>();
+                float width = size.x - (layout ? layout.padding.horizontal : 0);
+                float height = size.y - (layout ? layout.padding.vertical : 0);
+                float spacing = layout ? layout.spacing : 0f;
+                if (intro)
+                {
+                    height -= intro.GetPreferredValues(intro.text, width, 0f).y + spacing;
+                }
+
+                return SkillLines.FitTile(lines, width, height, spacing);
             }
         }
     }

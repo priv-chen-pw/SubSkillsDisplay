@@ -94,7 +94,18 @@ In the four slot lines each extra follows the loadout skill it replaces and an a
 `texBasicArrowRight` sprite, Addressables key `RoR2/Base/UI/texBasicArrowRight.png`, tinted in the survivor's
 colour; the game's fonts have no → glyph). Most extras replace whichever skill the slot holds, so they follow
 the picked one; CHEF's boosts set `ExtraSkill.replaces` to the skill they boost, so the tab shows
-Sear → Boosted Sear and Ice Box → Boosted Ice Box in one line whichever is picked.
+Sear → Boosted Sear and Ice Box → Boosted Ice Box whichever is picked. Each loadout skill that turns into
+something gets its own row, stacked inside the line (a vertical layout in `ButtonContainer`), so that line is
+two rows high.
+
+The button prefab squares itself from its height (`AspectRatioFitter`, height controls width) while the row
+squeezes button widths towards 48 px when short of room, so a full row (Railgunner's primary: 6 buttons and
+an arrow) used to overlap. `SkillLines.FitTile` instead picks one tile size for all the lines, at most 76,
+at least 32, at which every row fits the width after the title and all lines fit the height; buttons get
+exactly that size (fitter off), the gaps and arrow scale along, and row heights are fixed so anything still
+too big runs over rather than overlapping. The character select panel's size is only known once the screen
+is laid out (and changes with aspect ratio: about 550 wide at 16:9, 400 at 4:3), so the tab refits whenever
+it changes; the pause panel fits its 640 px column and a 700 px height.
 
 Hovering writes into the panel's description box like the Loadout tab (`LOGBOOK_HOVER_DESCRIPTION_FORMAT`:
 name, then description), followed by the keyword explanations the Skills tab shows
@@ -189,7 +200,7 @@ Discard and the corrupted skills come from defaults.
   character select.
 
 Commando, Huntress, Bandit, MUL-T, Engineer, Artificer, Mercenary, REX, Loader, Acrid, Seeker, False Son and
-Enforcer have no extra skills; their tab says so.
+Enforcer have no extra skills; their tab is greyed out.
 
 ## Modded survivors
 

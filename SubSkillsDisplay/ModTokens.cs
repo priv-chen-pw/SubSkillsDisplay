@@ -10,7 +10,6 @@ namespace SubSkillsDisplay
     {
         internal const string ExtraTab = "SUBSKILLSDISPLAY_TAB_EXTRA";
         internal const string ExtraIntro = "SUBSKILLSDISPLAY_EXTRA_INTRO";
-        internal const string ExtraNone = "SUBSKILLSDISPLAY_EXTRA_NONE";
         internal const string PauseAbilities = "SUBSKILLSDISPLAY_PAUSE_ABILITIES";
         internal const string PauseIntro = "SUBSKILLSDISPLAY_PAUSE_INTRO";
         internal const string PassiveLine = "SUBSKILLSDISPLAY_LINE_PASSIVE";
@@ -30,8 +29,6 @@ namespace SubSkillsDisplay
             english.SetStringByToken(ExtraTab, "Extra Skills");
             english.SetStringByToken(ExtraIntro,
                 "<style=cSub>What this survivor's skills turn into during a run, in the line of the skill they replace. Hover one for details. Skills from choices you haven't unlocked are hidden.</style>");
-            english.SetStringByToken(ExtraNone,
-                "<style=cSub>This survivor has no extra skills: everything it uses is on the Skills tab.</style>");
             english.SetStringByToken(PauseAbilities, "Abilities");
             english.SetStringByToken(PauseIntro,
                 "<style=cSub>Your skills, each followed by what it turns into during the run. Hover one for details.</style>");

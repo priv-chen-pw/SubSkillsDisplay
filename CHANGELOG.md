@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.3.0
+
+* Extra Skills tab: greyed out for survivors whose skills don't turn into anything, instead of an empty tab.
+* When two skills of a type each turn into something, they get a row each in that line (CHEF's Sear and Ice Box).
+* Skill icons shrink when a line has too many to fit, instead of overlapping (Railgunner's primary).
+* Shorter mod description.
+
 ## 1.2.1
 
 * README: videos instead of screenshots.

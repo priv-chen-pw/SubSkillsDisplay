@@ -9,11 +9,14 @@ using UnityEngine.UI;
 
 namespace SubSkillsDisplay
 {
-    /// <summary>A line of skills under a title, one per skill type (Primary, Secondary...) as in the Loadout tab.</summary>
+    /// <summary>
+    /// A line of skills under a title, one per skill type (Primary, Secondary...) as in the Loadout tab. It holds
+    /// one row per loadout skill that turns into something, stacked (CHEF's Sear and Ice Box).
+    /// </summary>
     internal sealed class SkillLine
     {
         internal readonly string titleToken;
-        internal readonly List<SkillEntry> entries = new List<SkillEntry>();
+        internal readonly List<List<SkillEntry>> rows = new List<List<SkillEntry>>();
 
         internal SkillLine(string titleToken)
         {
@@ -55,20 +58,22 @@ namespace SubSkillsDisplay
         }
 
         /// <summary>
-        /// Adds each loadout skill <paramref name="extras"/> replace in <paramref name="slot"/>, an arrow, and the
-        /// extras it turns into. Extras of no slot replace nothing, so they are added alone.
+        /// Adds a row for each loadout skill <paramref name="extras"/> replace in <paramref name="slot"/>: the
+        /// skill, an arrow, and the extras it turns into. Extras of no slot replace nothing, so they are added alone.
         /// </summary>
         internal void AddTurningInto(SurvivorLoadout body, SkillSlot slot, IEnumerable<ExtraSkill> extras)
         {
             foreach (IGrouping<SkillDef, ExtraSkill> group in extras.GroupBy(extra => extra.replaces ? extra.replaces : body.Selected(slot)))
             {
+                List<SkillEntry> row = new List<SkillEntry>();
                 if (group.Key)
                 {
-                    entries.Add(SkillEntry.Of(group.Key));
-                    entries.Add(SkillEntry.Arrow);
+                    row.Add(SkillEntry.Of(group.Key));
+                    row.Add(SkillEntry.Arrow);
                 }
 
-                entries.AddRange(group.Select(SkillEntry.Of));
+                row.AddRange(group.Select(SkillEntry.Of));
+                rows.Add(row);
             }
         }
 
@@ -82,8 +87,26 @@ namespace SubSkillsDisplay
     /// </summary>
     internal static class SkillLines
     {
-        /// <summary>Height of a Loadout row.</summary>
-        internal const float LineHeight = 96f;
+        /// <summary>
+        /// A Loadout button's size. The lines are drawn at this size, or smaller ones as a whole (see
+        /// <see cref="FitTile"/>), with the gaps and the arrow shrinking along.
+        /// </summary>
+        internal const float Tile = 76f;
+
+        /// <summary>The smallest tile <see cref="FitTile"/> shrinks to; lines that still don't fit run over.</summary>
+        private const float MinTile = 32f;
+
+        /// <summary>A Loadout row's height is its button plus this (96).</summary>
+        private const float LinePadding = 20f;
+
+        /// <summary>Left of the buttons is the line's title (the Loadout row's padding: 128 left, 8 right).</summary>
+        private const float TitleWidth = 136f;
+
+        /// <summary>Between buttons, as in a Loadout row.</summary>
+        private const float ButtonSpacing = 16f;
+
+        /// <summary>Between the rows of one line.</summary>
+        private const float RowSpacing = 12f;
 
         private const string ArrowAddress = "RoR2/Base/UI/texBasicArrowRight.png";
 
@@ -93,10 +116,44 @@ namespace SubSkillsDisplay
         private static Sprite arrow;
         private static bool arrowLoaded;
 
+        /// <summary>A line's height with buttons of size <paramref name="tile"/>.</summary>
+        internal static float LineHeight(SkillLine line, float tile) =>
+            LinePadding + line.rows.Count * tile + Mathf.Max(0, line.rows.Count - 1) * RowSpacing * tile / Tile;
+
+        /// <summary>The lines' height, <paramref name="spacing"/> apart.</summary>
+        internal static float Height(ICollection<SkillLine> lines, float tile, float spacing) =>
+            lines.Sum(line => LineHeight(line, tile)) + Mathf.Max(0, lines.Count - 1) * spacing;
+
+        /// <summary>
+        /// The largest tile, up to a Loadout button's, at which every row fits in <paramref name="width"/> and the
+        /// lines, <paramref name="spacing"/> apart, in <paramref name="height"/>.
+        /// </summary>
+        internal static float FitTile(ICollection<SkillLine> lines, float width, float height, float spacing)
+        {
+            // Every size but the title's and the lines' padding scales with the tile.
+            float tile = Tile;
+            foreach (List<SkillEntry> row in lines.SelectMany(line => line.rows).Where(row => row.Count > 0))
+            {
+                float rowWidth = row.Sum(entry => entry.isArrow ? ArrowWidth : Tile) + Mathf.Max(0, row.Count - 1) * ButtonSpacing;
+                tile = Mathf.Min(tile, Tile * (width - TitleWidth) / rowWidth);
+            }
+
+            float fixedHeight = lines.Count * LinePadding + Mathf.Max(0, lines.Count - 1) * spacing;
+            float scaledHeight = Height(lines, Tile, spacing) - fixedHeight;
+            if (scaledHeight > 0f)
+            {
+                tile = Mathf.Min(tile, Tile * (height - fixedHeight) / scaledHeight);
+            }
+
+            return Mathf.Clamp(tile, MinTile, Tile);
+        }
+
+        /// <param name="tile">The buttons' size, from <see cref="FitTile"/>.</param>
         /// <returns>The rows made, to destroy on the next rebuild.</returns>
         internal static List<GameObject> Build(RectTransform container, IEnumerable<SkillLine> lines, Color color,
-            LanguageTextMeshController hoverText, UILayerKey requiredTopLayer)
+            LanguageTextMeshController hoverText, UILayerKey requiredTopLayer, float tile)
         {
+            float scale = tile / Tile;
             List<GameObject> rows = new List<GameObject>();
             GameObject rowPrefab = LoadoutPanelController.rowPrefab;
             GameObject buttonPrefab = LoadoutPanelController.loadoutButtonPrefab;
@@ -134,16 +191,29 @@ namespace SubSkillsDisplay
                     }
                 }
 
-                Transform buttons = row.transform.Find("ButtonContainer") ?? row.transform;
-                foreach (SkillEntry entry in line.entries)
+                // Fixed, so lines that don't fit run over the panel rather than squeeze over each other.
+                LayoutElement height = row.GetComponent<LayoutElement>();
+                if (height)
                 {
-                    if (entry.isArrow)
+                    height.minHeight = height.preferredHeight = LineHeight(line, tile);
+                }
+
+                // The line's rows, stacked where the Loadout row has its buttons.
+                Transform buttons = row.transform.Find("ButtonContainer") ?? row.transform;
+                Transform stack = AddLayout<VerticalLayoutGroup>("Rows", buttons, RowSpacing * scale);
+                foreach (List<SkillEntry> entries in line.rows)
+                {
+                    Transform rowButtons = AddLayout<HorizontalLayoutGroup>("Row", stack, ButtonSpacing * scale);
+                    foreach (SkillEntry entry in entries)
                     {
-                        AddArrow(buttons, color);
-                    }
-                    else
-                    {
-                        AddButton(buttonPrefab, buttons, entry, color, hoverText, requiredTopLayer);
+                        if (entry.isArrow)
+                        {
+                            AddArrow(rowButtons, color, tile);
+                        }
+                        else
+                        {
+                            AddButton(buttonPrefab, rowButtons, entry, color, hoverText, requiredTopLayer, tile);
+                        }
                     }
                 }
 
@@ -154,14 +224,42 @@ namespace SubSkillsDisplay
             return rows;
         }
 
+        /// <summary>A layout, left-aligned, sizing its children to what they ask for.</summary>
+        private static Transform AddLayout<T>(string name, Transform parent, float spacing) where T : HorizontalOrVerticalLayoutGroup
+        {
+            GameObject layoutObject = new GameObject(name, typeof(RectTransform));
+            layoutObject.transform.SetParent(parent, worldPositionStays: false);
+
+            T layout = layoutObject.AddComponent<T>();
+            layout.spacing = spacing;
+            layout.childAlignment = TextAnchor.MiddleLeft;
+            layout.childControlWidth = layout.childControlHeight = true;
+            layout.childForceExpandWidth = layout.childForceExpandHeight = false;
+            return layoutObject.transform;
+        }
+
         private static void AddButton(GameObject buttonPrefab, Transform parent, SkillEntry entry, Color color,
-            LanguageTextMeshController hoverText, UILayerKey requiredTopLayer)
+            LanguageTextMeshController hoverText, UILayerKey requiredTopLayer, float tile)
         {
             GameObject buttonObject = Object.Instantiate(buttonPrefab, parent, worldPositionStays: false);
             HGButton button = buttonObject.GetComponent<HGButton>();
             if (!button)
             {
                 return;
+            }
+
+            // Exactly the tile. The prefab squares itself from its height, while the row squeezes its width when
+            // short of room: buttons then kept their full width at squeezed spacing, overlapping.
+            LayoutElement size = buttonObject.GetComponent<LayoutElement>();
+            if (size)
+            {
+                size.minWidth = size.preferredWidth = size.minHeight = size.preferredHeight = tile;
+            }
+
+            AspectRatioFitter square = buttonObject.GetComponent<AspectRatioFitter>();
+            if (square)
+            {
+                square.enabled = false;
             }
 
             if (button.targetGraphic is Image image)
@@ -192,7 +290,7 @@ namespace SubSkillsDisplay
         }
 
         /// <summary>The game's right arrow in the line's colour, between a skill and what it turns into.</summary>
-        private static void AddArrow(Transform parent, Color color)
+        private static void AddArrow(Transform parent, Color color, float tile)
         {
             if (!arrowLoaded)
             {
@@ -218,8 +316,10 @@ namespace SubSkillsDisplay
             image.preserveAspect = true;
             image.raycastTarget = false;
 
+            // As high as the buttons: the sprite's own 62 px would make a row of small buttons taller.
             LayoutElement size = arrowObject.AddComponent<LayoutElement>();
-            size.minWidth = size.preferredWidth = ArrowWidth;
+            size.minWidth = size.preferredWidth = ArrowWidth * tile / Tile;
+            size.minHeight = size.preferredHeight = tile;
         }
     }
 }

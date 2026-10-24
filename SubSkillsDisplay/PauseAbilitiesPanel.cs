@@ -27,6 +27,12 @@ namespace SubSkillsDisplay
 
         private const float ColumnWidth = 640f;
 
+        /// <summary>
+        /// Room for the lines under the title and explanation and above Back on the 1080-unit-high screen; more
+        /// lines shrink their buttons. Every vanilla survivor's fit at full size.
+        /// </summary>
+        private const float MaxLinesHeight = 700f;
+
         /// <summary>The description box beside the lines, a little narrower than vanilla's 600 px.</summary>
         private const float HoverBoxWidth = 520f;
 
@@ -181,19 +187,21 @@ namespace SubSkillsDisplay
                 return lines;
             }
 
-            SkillLine passive = new SkillLine(ModTokens.PassiveLine);
+            List<SkillEntry> passives = new List<SkillEntry>();
             if (body.skillLocator.passiveSkill.enabled)
             {
-                passive.entries.Add(SkillEntry.Of(body.skillLocator.passiveSkill));
+                passives.Add(SkillEntry.Of(body.skillLocator.passiveSkill));
             }
 
-            passive.entries.AddRange(body.slots
+            passives.AddRange(body.slots
                 .Where(slot => !slot.hideInCharacterSelect && body.KindOf(slot) == SkillSlot.None)
                 .Select(body.Selected)
                 .Where(skill => skill)
                 .Select(SkillEntry.Of));
-            if (passive.entries.Count > 0)
+            if (passives.Count > 0)
             {
+                SkillLine passive = new SkillLine(ModTokens.PassiveLine);
+                passive.rows.Add(passives);
                 lines.Add(passive);
             }
 
@@ -204,12 +212,12 @@ namespace SubSkillsDisplay
 
                 // A skill that turns into nothing is shown alone, without an arrow.
                 SkillDef skill = body.Selected(kind);
-                if (line.entries.Count == 0 && skill)
+                if (line.rows.Count == 0 && skill)
                 {
-                    line.entries.Add(SkillEntry.Of(skill));
+                    line.rows.Add(new List<SkillEntry> { SkillEntry.Of(skill) });
                 }
 
-                if (line.entries.Count > 0)
+                if (line.rows.Count > 0)
                 {
                     lines.Add(line);
                 }
@@ -310,14 +318,15 @@ namespace SubSkillsDisplay
                 column.transform.SetAsLastSibling();
             }
 
+            float spacing = columnLayout ? columnLayout.spacing : 0f;
+            float tile = SkillLines.FitTile(lines, ColumnWidth - (columnLayout ? columnLayout.padding.horizontal : 0f), MaxLinesHeight, spacing);
             LanguageTextMeshController hoverText = stripButton ? stripButton.hoverLanguageTextMeshController : null;
-            SkillLines.Build((RectTransform)column.transform, lines, color, hoverText, key);
+            SkillLines.Build((RectTransform)column.transform, lines, color, hoverText, key, tile);
 
             float padding = columnLayout ? columnLayout.padding.vertical : 0f;
-            float spacing = columnLayout ? columnLayout.spacing : 0f;
             LayoutElement size = LayoutElementOf(column);
             size.minWidth = size.preferredWidth = ColumnWidth;
-            size.minHeight = size.preferredHeight = padding + Mathf.Max(1, lines.Count) * SkillLines.LineHeight + Mathf.Max(0, lines.Count - 1) * spacing;
+            size.minHeight = size.preferredHeight = padding + Mathf.Max(SkillLines.Tile, SkillLines.Height(lines, tile, spacing));
 
             // The box hovering writes into hangs off the lines' right edge, as in character select.
             Transform box = hoverText ? hoverText.transform : null;
